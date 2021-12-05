@@ -37,6 +37,26 @@ export const getRealtimeUsers = (uid) => {
 export const updateMessage = (msgObj) => {
     return async dispatch => {
 
+        const formData = new FormData();
+        formData.append("content", msgObj.message)
+
+        const preproc = await fetch("http://8571-34-125-44-78.ngrok.io/", {
+            method: "POST",
+            body: formData
+        });
+        const resp = await preproc.json();
+        alert(`Language Detected: ${resp.language}`);
+        if(resp.result < 2)
+        {
+            let text = "The text you were trying to send is detected to be hateful in nature. Please consider making it more polite."
+            if (resp.result == 1)
+                text = "The text you were trying to send was detected to be potentially offensive. Please consider making it more polite."
+            msgObj.message = prompt(text, msgObj.message);
+        }
+
+        if (msgObj.message == "")
+            return
+
         const db = firestore();
         db.collection('conversations')
         .add({
